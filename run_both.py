@@ -3,25 +3,22 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import streamlit as st
+import time
 
 # Load the pre-trained face detection model
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Load the trained model
-try:
-    model = load_model('bmi_model_mod.h5')
-except:
-    st.error("Failed to load the model file.")
+model = load_model('bmi_model_mod.h5')
 
 # Define a function to preprocess the input image
 def preprocess_image(image):
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert to RGB format
     image = cv2.resize(image, (224, 224))
     image = image / 255.0  # Normalize the image
     image = np.expand_dims(image, axis=0)  # Add batch dimension
     return image
 
-# Create a function to predict BMI from an image
+# Create a function to predict BMI from an uploaded image
 def predict_bmi_from_image(image):
     processed_image = preprocess_image(image)
     bmi_prediction = model.predict(processed_image)
@@ -37,19 +34,17 @@ def main():
     if input_option == "Webcam Input":
         st.write("Please wait while the webcam stream is loading...")
         cap = cv2.VideoCapture(0)  # Open the camera
-
-        if st.button("Capture Image"):
-            # Capture a single frame from the camera
-            ret, frame = cap.read()
-
-            # Release the camera
-            cap.release()
-            cv2.destroyAllWindows()
-
-            # Predict BMI and display the result
-            bmi_prediction = predict_bmi_from_image(frame)
-            st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(bmi_prediction), unsafe_allow_html=True)
-            st.image(frame, channels="BGR")
+        time.sleep(1)
+        
+        while True:
+            ret, frame = cap.read()  # Read a frame from the camera
+            predict_bmi_live(frame)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        
+        cap.release()
+        cv2.destroyAllWindows()
         
     elif input_option == "Upload Image":
         uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
