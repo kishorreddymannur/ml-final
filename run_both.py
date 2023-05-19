@@ -1,21 +1,17 @@
-import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 import streamlit as st
 import time
 
-# Load the pre-trained face detection model
-face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
 # Load the trained model
 model = load_model('bmi_model_mod.h5')
 
 # Define a function to preprocess the input image
 def preprocess_image(image):
-    image = cv2.resize(image, (224, 224))
-    image = image / 255.0  # Normalize the image
-    image = np.expand_dims(image, axis=0)  # Add batch dimension
+    image = tf.image.resize(image, (224, 224))
+    image = tf.cast(image, tf.float32) / 255.0  # Normalize the image
+    image = tf.expand_dims(image, axis=0)  # Add batch dimension
     return image
 
 # Create a function to predict BMI from an uploaded image
@@ -33,26 +29,22 @@ def main():
 
     if input_option == "Webcam Input":
         st.write("Please wait while the webcam stream is loading...")
-        cap = cv2.VideoCapture(0)  # Open the camera
+        camera = st.camera_input(width=224, height=224)
         time.sleep(1)
         
         while True:
-            ret, frame = cap.read()  # Read a frame from the camera
-            predict_bmi_from_image(frame)
+            predict_bmi_from_image(camera)
             
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if st.button("Stop"):
                 break
-        
-        cap.release()
-        cv2.destroyAllWindows()
         
     elif input_option == "Upload Image":
         uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
-            image = np.array(cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1))
+            image = np.array(Image.open(uploaded_file).resize((224, 224)))
             bmi_prediction = predict_bmi_from_image(image)
             st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(bmi_prediction), unsafe_allow_html=True)
-            st.image(image, channels="BGR")
+            st.image(image, channels="RGB")
         else:
             st.write("No image uploaded.")
 
