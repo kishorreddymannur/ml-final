@@ -26,15 +26,16 @@ def predict_bmi_from_image(image):
 
 # Create a function to capture live video from the camera and predict BMI
 def predict_bmi_live(frame):
+        
     # Preprocess the frame
-    processed_frame = preprocess_image(frame)
+    processed_image = preprocess_image(frame)
     
     # Convert the frame to grayscale for face detection
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     
     # Perform face detection
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    
+    st.write(faces)
     # Iterate over detected faces
     for (x, y, w, h) in faces:
         # Draw a bounding box around the face
@@ -48,12 +49,12 @@ def predict_bmi_live(frame):
         
         # Predict BMI
         bmi_prediction = model.predict(processed_face)
-        
+        st.write(bmi_prediction[0][0])
         # Display the predicted BMI on the frame
-        bmi_text = "Predicted BMI: {:.2f}".format(bmi_prediction[0][0])
+        bmi_text = "Predicted BMI: {:.2f}".format(bmi_prediction[0][0]).zfill(5)
         cv2.putText(frame, bmi_text, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
 
-    return frame
+    st.image(frame,channels='BGR')
 
 # Create a Streamlit app
 def main():
@@ -65,35 +66,26 @@ def main():
     if input_option == "Webcam Input":
         st.write("Please wait while the webcam stream is loading...")
         cap = cv2.VideoCapture(0)  # Open the camera
+        time.sleep(1)
+        ret, frame = cap.read()  # Read a frame from the camera     
+        predict_bmi_live(frame)
+        #processed_frame = predict_bmi_live(frame)
+        #st.image(processed_frame, channels="BGR")
         
-        # Read and process frames from the camera
-        while True:
-            ret, frame = cap.read()  # Read a frame from the camera
-            
-            # Call the function to predict BMI and draw bounding boxes
-            processed_frame = predict_bmi_live(frame)
-            
-            # Display the processed frame with bounding boxes and predicted BMI
-            st.image(processed_frame, channels="BGR")
-            
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+        #if cv2.waitKey(1) & 0xFF == ord('q'):
+        #    break
         
-        cap.release()
-        cv2.destroyAllWindows()
+        #cap.release()
+        #cv2.destroyAllWindows()
         
     elif input_option == "Upload Image":
         uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
             image = np.array(cv2.imdecode(np.frombuffer(uploaded_file.read(), np.uint8), 1))
-            # Call the function to predict BMI and draw bounding boxes
-            processed_image = predict_bmi_from_image(image)
-            
-            # Display the uploaded image with bounding boxes and predicted BMI
-            processed_image_with_bmi = predict_bmi_live(image)
-            st.image(processed_image_with_bmi, channels="BGR")
-            
-            st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(processed_image), unsafe_allow_html=True)
+            #bmi_prediction = predict_bmi_from_image(image)
+            predict_bmi_from_image(image)
+            #st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(bmi_prediction), unsafe_allow_html=True)
+            #st.image(image, channels="BGR")
         else:
             st.write("No image uploaded.")
 
