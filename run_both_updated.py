@@ -1,16 +1,16 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from PIL import Image
 import streamlit as st
 import time
-import face_recognition
-
-# Load the pre-trained face detection model
-face_cascade = face_recognition.load_image_file('haarcascade_frontalface_default.xml')
+import dlib
+from PIL import Image
 
 # Load the trained model
 model = load_model('bmi_model_mod.h5')
+
+# Load the face detector
+detector = dlib.get_frontal_face_detector()
 
 # Define a function to preprocess the input image
 def preprocess_image(image):
@@ -34,16 +34,12 @@ def predict_bmi_live(frame):
     gray = np.array(frame.convert('L'))
     
     # Perform face detection
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
-    st.write(faces)
+    faces = detector(gray)
     
     # Iterate over detected faces
-    for (x, y, w, h) in faces:
-        # Draw a bounding box around the face
-        draw = ImageDraw.Draw(frame)
-        draw.rectangle([(x, y), (x + w, y + h)], outline=(255, 0, 0), width=2)
-        
+    for face in faces:
         # Extract the face region from the frame
+        x, y, w, h = face.left(), face.top(), face.width(), face.height()
         face_image = frame.crop((x, y, x + w, y + h))
         
         # Preprocess the face image
@@ -51,13 +47,13 @@ def predict_bmi_live(frame):
         
         # Predict BMI
         bmi_prediction = model.predict(processed_face)
-        st.write(bmi_prediction[0][0])
         
         # Display the predicted BMI on the frame
         bmi_text = "Predicted BMI: {:.2f}".format(bmi_prediction[0][0]).zfill(5)
+        draw = ImageDraw.Draw(frame)
         draw.text((x, y - 10), bmi_text, fill=(0, 255, 0))
     
-    st.image(frame)
+    st.image(frame, channels='RGB')
 
 # Create a Streamlit app
 def main():
