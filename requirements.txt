@@ -1,7 +1,8 @@
 opencv-python-headless==4.7.0.72
-tensorflow
-streamlit==1.22.0
 numpy==1.23.5
 google-cloud-storage
-face_recognition
 time
+streamlit==0.88.0
+tensorflow==2.6.0
+Pillow==8.4.0
+face_recognition==1.3.0
