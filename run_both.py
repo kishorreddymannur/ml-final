@@ -1,12 +1,27 @@
 import cv2
 import numpy as np
 import tensorflow as tf
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 import streamlit as st
 
+import streamlit as st
+from google.cloud import storage
+
+# Authenticate GCP credentials
+# Make sure you have set the environment variable GOOGLE_APPLICATION_CREDENTIALS to the path of your service account key JSON file
+
+# Create a client to access the GCP bucket
+client = storage.Client()
+
+# Load the model from the GCP bucket
+bucket_name = "ml-model-host"
+model_filename = "20230517_Mod.h5"  # Adjust the filename and format based on your model type
+bucket = client.get_bucket(bucket_name)
+blob = bucket.blob(model_filename)
+blob.download_to_filename(model_filename)
+
 # Load the trained model
-model_path = 'Model/20230517_Main.h5'
-model = load_model(model_path)
+model = load_model(model_filename)
 
 
 # Define a function to preprocess the input image
