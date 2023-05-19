@@ -1,5 +1,5 @@
 opencv-python-headless==4.7.0.72
-tensorflow==2.12.0
+tensorflow
 streamlit==1.22.0
 numpy==1.23.5
 google-cloud-storage
