@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
+from PIL import Image
 import streamlit as st
 import time
 
@@ -29,11 +30,12 @@ def main():
 
     if input_option == "Webcam Input":
         st.write("Please wait while the webcam stream is loading...")
-        camera = st.camera_input(width=224, height=224)
+        camera = st.camera()
         time.sleep(1)
         
         while True:
-            predict_bmi_from_image(camera)
+            resized_frame = np.array(Image.fromarray(camera).resize((224, 224)))
+            predict_bmi_from_image(resized_frame)
             
             if st.button("Stop"):
                 break
