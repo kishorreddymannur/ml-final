@@ -3,5 +3,3 @@ numpy
 google-cloud-storage
 streamlit
 tensorflow
-Pillow
-dlib
