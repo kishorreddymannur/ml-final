@@ -38,7 +38,7 @@ def main():
         
         while True:
             ret, frame = cap.read()  # Read a frame from the camera
-            predict_bmi_live(frame)
+            predict_bmi_from_image(frame)
             
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
