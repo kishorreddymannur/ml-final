@@ -15,7 +15,7 @@ client = storage.Client()
 
 # Load the model from the GCP bucket
 bucket_name = "ml-model-host"
-model_filename = "20230517_Mod.h5"  # Adjust the filename and format based on your model type
+model_filename = "20230517_Mid.h5"  # Adjust the filename and format based on your model type
 bucket = client.get_bucket(bucket_name)
 blob = bucket.blob(model_filename)
 blob.download_to_filename(model_filename)
