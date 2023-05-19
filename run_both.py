@@ -3,6 +3,8 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from PIL import Image
 import streamlit as st
+import streamlit_webrtc as webrtc
+import av
 import time
 
 # Load the trained model
@@ -30,22 +32,33 @@ def main():
 
     if input_option == "Webcam Input":
         st.write("Please wait while the webcam stream is loading...")
-        camera = st.camera()
-        time.sleep(1)
-        
+        webrtc_ctx = webrtc.StreamlitWebRTC(
+            key="webcam",
+            video_transformer_factory=None,  # Pass None to use default video transformer
+            async_transform=True,
+            desired_playing_state=True,
+            media_stream_constraints={"video": True},
+        )
+
         while True:
-            resized_frame = np.array(Image.fromarray(camera).resize((224, 224)))
-            predict_bmi_from_image(resized_frame)
-            
+            if webrtc_ctx.video_receiver:
+                frame = webrtc_ctx.video_receiver.last_frame
+                if frame is not None:
+                    image = frame.to_ndarray(format="rgb24")
+                    resized_frame = np.array(Image.fromarray(image).resize((224, 224)))
+                    predict_bmi_from_image(resized_frame)
+
             if st.button("Stop"):
+                webrtc_ctx.video_receiver.stop()
                 break
-        
+
     elif input_option == "Upload Image":
         uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
         if uploaded_file is not None:
             image = np.array(Image.open(uploaded_file).resize((224, 224)))
             bmi_prediction = predict_bmi_from_image(image)
-            st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(bmi_prediction), unsafe_allow_html=True)
+            st.markdown("<h3 style='text-align: center;'>Predicted BMI: {:.2f}</h3>".format(bmi_prediction),
+                        unsafe_allow_html=True)
             st.image(image, channels="RGB")
         else:
             st.write("No image uploaded.")
