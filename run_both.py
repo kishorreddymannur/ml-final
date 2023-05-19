@@ -5,7 +5,9 @@ from tensorflow.keras.models import load_model
 import streamlit as st
 
 # Load the trained model
-model = load_model('20230517_Main.h5')
+model_path = 'Model/20230517_Main.h5'
+model = load_model(model_path)
+
 
 # Define a function to preprocess the input image
 def preprocess_image(image):
