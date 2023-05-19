@@ -1,7 +1,7 @@
-opencv-python-headless==4.7.0.72
-numpy==1.23.5
+opencv-python-headless
+numpy
 google-cloud-storage
-streamlit==0.88.0
-tensorflow==2.6.0
-Pillow==8.4.0
-face_recognition==1.3.0
+streamlit
+tensorflow
+Pillow
+face_recognition
