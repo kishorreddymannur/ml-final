@@ -4,4 +4,4 @@ google-cloud-storage
 streamlit
 tensorflow
 Pillow
-face_recognition
+dlib
